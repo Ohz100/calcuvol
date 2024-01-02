@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    max-width: 720px;
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+
+otman.herrera@triarccorp.com<br>2023-03-11 a
+<h2>Calculadora de nivel</h2>
+
+<form>
+	<h3>Unidades</h3>
+	
+	<label for="units">Longitud: </label>
+	<select id="length_units">
+  		<option value="m">m</option>
+		<option value="mm">mm</option>
+		<option value="in">in</option>
+	</select><br><br>
+	
+	<label for="units">Volumen: </label>
+	<select id="volume_units">
+  		<option value="cubic_m">m&sup3;</option>
+		<option value="liter">L</option>
+		<option value="gallon">gal</option>
+	</select><br><br>
+	
+	<h3>Datos de entrada</h3>
+	
+	<label for="vessel_type">Tipo de recipiente</label><br>
+	<select id="vessel_type" onchange="showhidelevel()">
+  		<option value="horizontal">Horizontal</option>
+		<option value="vertical">Vertical</option>
+	</select><br><br>
+	
+	<label for="head_type">Tipo de cabezas</label><br>
+	<select id="head_type" onchange="showhidedheadattr()">
+  		<option value="hemisphere">Semiesférica</option>
+		<option value="elliptical">Semielíptica 2:1</option>
+	</select><br><br>
+	
+	<label for="diameter">Diámetro</label><br>
+	<input type="text" id="diameter">
+	<select id="side">
+  		<option value="outside">exterior</option>
+		<option value="inside">interior</option>
+	</select><br><br>
+	
+	<label for="length">Longitud del cuerpo</label><br>
+	<input type="text" id="length"><br><br>
+	
+	<label for="t_head">Espesor de las cabezas</label><br>
+	<input type="text" id="t_head"><br><br>
+	
+	<label for="t_shell">Espesor del cuerpo</label><br>
+	<input type="text" id="t_shell"><br><br>
+	
+	<label for="cutback" id="cutbackl" style="display:inline">Recorte de las cabezas</label><br>
+	<input type="text" id="cutback" style="display:inline"><br><br>
+	
+	<label for="straight_flange" id="straight_flangel" style="display:none">Parte recta</label><br>
+	<input type="text" id="straight_flange" style="display:none"><br><br>
+	
+	<label for="out_type">Se desea conocer el nivel a un determinado:</label><br>
+	<input type="radio" id="out_type_porcent" name="out_type" value="porcent" checked=true onclick="setoutporcent()">
+	<label for="out_type_porcent">Porcentaje (%) de llenado</label><br>
+	<input type="radio" id="out_type_volume" name="out_type" value="volume" onclick="setoutvolume()">
+	<label for="out_type_volum">Volumen</label><br><br>
+	
+	<label for="porcent" id="porcentl" style="display:inline">Porcentaje</label><br>
+	<input type="text" id="porcent" style="display:inline"><br><br>
+	
+	<label for="volume" id="volumel" style="display:none">Volumen</label><br>
+	<input type="text" id="volume" style="display:none"><br><br>
+	
+	<h3>Resultados</h3>
+	
+	<button type="button" onclick="z_height()">Calcular nivel</button><br><br>
+	
+	<table>
+		<tr>
+			<th style="width:240px"></th>
+			<th style="width:90px">mm</th>
+			<th style="width:90px">in</th></tr>
+		<tr>
+			<td><output id="level_vs_type">Nivel desde la línea de centro</output></td>
+			<td><output id="level"></output></td>
+			<td><output id="level_in"></output></td></tr>
+		<tr>
+			<td>Altura de la columna de líquido</td>
+			<td><output id="level_bottom"></output></td>
+			<td><output id="level_bottom_in"></output></td></tr>
+	</table>
+	<br>
+	<table>
+		<tr>
+			<th style="width:240px"></th>
+			<th style="width:90px">L</th>
+			<th style="width:90px">gal</th></tr>
+		<tr>
+			<td>Volumen total (100%)</td>
+			<td><output id="total_vol"></output></td>
+			<td><output id="total_vol_gal"></output></td></tr>
+		<tr>
+			<td>Volumen al nivel de líquido</td>
+			<td><output id="targe"></output></td>
+			<td><output id="targe_gal"></output></td></tr>
+	</table>
+	<br>
+	<output id="error"></output>
+	<br>
+	<br>
+</form>
+
+<script>
+function showhidelevel() {
+	if(document.getElementById("vessel_type").value == "vertical"){
+		document.getElementById("level_vs_type").innerHTML = "Nivel desde la circular inferior";
+	}else{
+		document.getElementById("level_vs_type").innerHTML = "Nivel desde la línea de centro";
+	}
+}
+function showhidedheadattr() {
+	if(document.getElementById("head_type").value == "elliptical"){
+		document.getElementById("cutbackl").style = "display:none";
+		document.getElementById("cutback").style = "display:none";
+		document.getElementById("straight_flangel").style = "display:inline";
+		document.getElementById("straight_flange").style = "display:inline";
+	}else{
+		document.getElementById("cutbackl").style = "display:inline";
+		document.getElementById("cutback").style = "display:inline";
+		document.getElementById("straight_flangel").style = "display:none";
+		document.getElementById("straight_flange").style = "display:none";
+	}
+}
+function setoutporcent() {
+	document.getElementById("volumel").style = "display:none";
+	document.getElementById("volume").style = "display:none";
+	document.getElementById("porcentl").style = "display:inline";
+	document.getElementById("porcent").style = "display:inline";
+}
+function setoutvolume() {
+	document.getElementById("volumel").style = "display:inline";
+	document.getElementById("volume").style = "display:inline";
+	document.getElementById("porcentl").style = "display:none";
+	document.getElementById("porcent").style = "display:none";
+}
+function vol1(r_h, r_s, l, z) {
+	if(z < -r_h){
+		volh = 0;
+	}else{
+		if(z > r_h){
+			volh = 4 * Math.PI * r_h**3 / 3;
+		}else{
+			volh = Math.PI * (r_h + z)**2 * (2 * r_h - z) / 3;
+		}
+	}
+	if(z < -r_s){
+		vols = 0;
+	}else{
+		if(z > r_s){
+			vols = l * Math.PI * r_s**2;
+		}else{
+			vols = l * (r_s**2 * Math.asin(z / r_s) + z * Math.sqrt(r_s**2 - z**2) + Math.PI * r_s**2 / 2);
+		}
+	}
+	return volh + vols;
+}
+function diff1(r_h, r_s, l, z) {
+	if(z < -r_h){
+		diffh = 0;
+	}else{
+		if(z > r_h){
+			diffh = 0;
+		}else{
+			diffh = Math.PI*(r_h**2 - z**2);
+		}
+	}
+	if(z < -r_s){
+		diffs = 0;
+	}else{
+		if(z > r_s){
+			diffs = 0;
+		}else{
+			diffs = 2 * l * Math.sqrt(r_s**2 - z**2);
+		}
+	}
+	return diffh + diffs;
+}
+function vol2(r_h, r_s, l, z) {
+	if(z < -r_h){
+		volh = 0;
+	}else{
+		if(z > r_h){
+			volh = 2 * Math.PI * r_h**3 / 3;
+		}else{
+			volh = Math.PI * (r_h + z)**2 * (2 * r_h - z) / 6;
+		}
+	}
+	if(z < -r_s){
+		vols = 0;
+	}else{
+		if(z > r_s){
+			vols = l * Math.PI * r_s**2;
+		}else{
+			vols = l * (r_s**2 * Math.asin(z / r_s) + z * Math.sqrt(r_s**2 - z**2) + Math.PI * r_s**2 / 2);
+		}
+	}
+	return volh + vols;
+}
+function diff2(r_h, r_s, l, z) {
+	if(z < -r_h){
+		diffh = 0;
+	}else{
+		if(z > r_h){
+			diffh = 0;
+		}else{
+			diffh = Math.PI*(r_h**2 - z**2) / 2;
+		}
+	}
+	if(z < -r_s){
+		diffs = 0;
+	}else{
+		if(z > r_s){
+			diffs = 0;
+		}else{
+			diffs = 2 * l * Math.sqrt(r_s**2 - z**2);
+		}
+	}
+	return diffh + diffs;
+}
+function vol3(r_h, r_s, l, z, cb) {
+	if(z < 0){
+		return 0;
+	}else if(z < r_h - cb){
+		return Math.PI * (3*r_h - z) * z**2 / 3;
+	}else if(z < r_h - cb + l){
+		zz = z - r_h + cb;
+		return Math.PI * (r_h - cb)**2 * (2*r_h + cb) / 3 + Math.PI * r_s**2 * zz;
+	}else if(z < 2*(r_h - cb) + l){
+		zz = z - r_h + cb - l;
+		return Math.PI * (r_h - cb)**2 * (2*r_h + cb) / 3 + Math.PI * r_s**2 * l + Math.PI * zz * (3 * r_h**2 - 3 * cb**2 - 3 * cb * zz - zz**2) / 3;
+	}else{
+		return 2 * Math.PI * (r_h - cb)**2 * (2*r_h + cb) / 3 + Math.PI* r_s**2 * l;
+	}
+}
+function diff3(r_h, r_s, l, z, cb) {
+	if(z < 0){
+		return 0;
+	}else if(z < r_h - cb){
+		return Math.PI * z * (2 * r_h - z);
+	}else if(z < r_h - cb + l){
+		return Math.PI * r_s**2;
+	}else if(z < 2*(r_h - cb) + l){
+		zz = z - r_h + cb - l;
+		return Math.PI * (r_h + cb + zz) * (r_h - cb - zz);
+	}else{
+		return 0;
+	}
+}
+function vol4(r_h, r_s, l, z) {
+	if(z < 0){
+		return 0;
+	}else if(z < r_h/2){
+		return 2* Math.PI * z**2 * (3*r_h - 2*z)/ 3;
+	}else if(z < r_h/2 + l){
+		zz = z - r_h/2;
+		return Math.PI * r_h**3 / 3 + Math.PI * r_s**2 * zz;
+	}else if(z < r_h + l){
+		zz = z - r_h/2 - l;
+		return Math.PI * r_h**3 / 3 + Math.PI * r_s**2 * l + Math.PI * zz * (3 * r_h**2 - 4 * zz**2)/ 3;
+	}else{
+		return 2* Math.PI * r_h**3 / 3 + Math.PI * r_s**2 * l;
+	}
+}
+function diff4(r_h, r_s, l, z) {
+	if(z < 0){
+		return 0;
+	}else if(z < r_h/2){
+		return 4 * Math.PI * z * (r_h - z);
+	}else if(z < r_h/2 + l){
+		return Math.PI * r_s**2;
+	}else if(z < r_h + l){
+		zz = z - r_h/2 - l;
+		return Math.PI * (r_h + 2 * zz) * (r_h - 2 * zz);
+	}else{
+		return 0;
+	}
+}
+function z_height() {
+	var lenfac;
+	var volfac;
+	var total_vol;
+	var targe;
+	var volume;
+	switch(document.getElementById("length_units").value) {
+		case "mm":
+			lenfac = 0.001;
+			break;
+		case "in":
+			lenfac = 0.0254;
+			break;
+		default:
+			lenfac = 1;
+	}
+	switch(document.getElementById("volume_units").value) {
+		case "liter":
+			volfac = 0.001;
+			break;
+		case "gallon":
+			volfac = 0.0254**3 * 231;
+			break;
+		default:
+			volfac = 1;
+	}
+	var d = lenfac * parseFloat(document.getElementById("diameter").value);
+	var l = lenfac * parseFloat(document.getElementById("length").value);
+	if(document.getElementById("side").value == "outside"){
+		var t_h = lenfac * parseFloat(document.getElementById("t_head").value);
+		var t_s = lenfac * parseFloat(document.getElementById("t_shell").value);
+		r_h = d/2 - t_h;
+		r_s = d/2 - t_s;
+	}else{
+		r_h = d/2;
+		r_s = d/2;
+	}
+	if(document.getElementById("head_type").value == "elliptical"){
+		var sf = lenfac * parseFloat(document.getElementById("straight_flange").value);
+		l = l + 2 * sf;
+		total_vol = 2 * Math.PI * r_h**3 / 3 + Math.PI* r_s**2 * l;
+	}else{ 
+		var cb = lenfac * parseFloat(document.getElementById("cutback").value);
+		if(document.getElementById("vessel_type").value == "vertical"){
+			l = l;
+			total_vol = 2 * Math.PI * (r_h - cb)**2 * (2*r_h + cb) / 3 + Math.PI* r_s**2 * l;
+		}else{
+			l = l - (6 * cb * r_h**2 - 2 * cb**3)/(3 * r_s**2);
+			total_vol = 4 * Math.PI * r_h**3 / 3 + Math.PI* r_s**2 * l;
+		}
+	}
+	if(document.getElementById("out_type_porcent").checked){
+		targe = parseFloat(document.getElementById("porcent").value)/100 * total_vol;
+	}else{
+		targe = volfac * parseFloat(document.getElementById("volume").value);
+	}
+	n = 0;
+	if(document.getElementById("vessel_type").value == "vertical"){
+		if(document.getElementById("head_type").value == "elliptical"){
+			z = r_h/2 + l/2;
+			volume = vol4(r_h, r_s, l, z);
+			while((targe - volume)**2 > 10**-14 && n < 100){
+				z = (targe - volume)/diff4(r_h, r_s, l, z) + z;
+				volume = vol4(r_h, r_s, l, z);
+				n++;
+			}
+			zb = z;
+			z = z - r_h/2 - sf
+		}else{
+			z = r_h - cb + l/2;
+			volume = vol3(r_h, r_s, l, z, cb);
+			while((targe - volume)**2 > 10**-14 && n < 100){
+				z = (targe - volume)/diff3(r_h, r_s, l, z, cb) + z;
+				volume = vol3(r_h, r_s, l, z, cb);
+				n++;
+			}
+			zb = z;
+			z = z - r_h + cb
+		}
+	}else{
+		z = 0;
+		if(document.getElementById("head_type").value == "elliptical"){
+			volume = vol2(r_h, r_s, l, z);
+			while((targe - volume)**2 > 10**-14 && n < 100){
+				z = (targe - volume)/diff2(r_h, r_s, l, z) + z;
+				volume = vol2(r_h, r_s, l, z);
+				n++;
+			}
+		}else{
+			volume = vol1(r_h, r_s, l, z);
+			while((targe - volume)**2 > 10**-14 && n < 100){
+				z = (targe - volume)/diff1(r_h, r_s, l, z) + z;
+				volume = vol1(r_h, r_s, l, z);
+				n++;
+			}
+		}
+	zb = z + r_s;
+	}
+	document.getElementById("level").innerHTML = Math.round(z/0.001 * 1000)/1000;
+	document.getElementById("level_in").innerHTML = Math.round(z/0.0254 * 10000)/10000;
+	document.getElementById("level_bottom").innerHTML = Math.round(zb/0.001 * 1000)/1000;
+	document.getElementById("level_bottom_in").innerHTML = Math.round(zb/0.0254 * 10000)/10000;
+	document.getElementById("total_vol").innerHTML = Math.round(total_vol/0.001 * 1000)/1000;
+	document.getElementById("total_vol_gal").innerHTML = Math.round(total_vol/(0.0254**3 * 231) * 1000)/1000;
+	document.getElementById("targe").innerHTML = Math.round(targe/0.001 * 1000)/1000;
+	document.getElementById("targe_gal").innerHTML = Math.round(targe/(0.0254**3 * 231) * 1000)/1000;
+	document.getElementById("error").innerHTML = "error (mL): " + 1000000*(targe - volume);
+}
+</script>
+
+</body>
+</html>
